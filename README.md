@@ -1,2 +1,2 @@
 # rupert-audio-player
-Plays audiot
+Plays audio
