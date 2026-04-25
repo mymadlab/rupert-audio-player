@@ -27,3 +27,8 @@ Feature: Playlists
 		Given a playlist of tracks is playing
 		When I skip to the previous track
 		Then the previous track in the playlist should start playing
+
+	Scenario: Directory as a playlist
+		Given a directory containing audio files
+		When I add the directory to the playlist
+		Then all audio files in the directory should be added to the playlist and start playing in order

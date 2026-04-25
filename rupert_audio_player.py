@@ -4,6 +4,7 @@ Description: Controls rupert audio
 import json
 import random
 import time
+from pathlib import Path
 from loguru import logger
 from beartype import beartype
 import vlc
@@ -124,12 +125,19 @@ class RupertAudioPlayer():
 			# do nothing we know this may blow up if something has not already started to play
 			print("Stopping crash bypassed")
 
-	def set(self, control_dict: dict[str, set[str, int]]) -> None:
+	@beartype
+	def set(self, control_dict: dict[str, str | int | bool | list[str]]) -> None:
 		"""
 		Control the audio player. Requires:
 			control_dict = Dictionary detailing what controls to execute
 		"""
 		self.control_dict = control_dict
+
+		if 'play_directory' in self.control_dict:
+			self.control_dict['play_tracks'] = self.__get_directory_tracks(
+				self.control_dict['play_directory']
+			)
+
 		if 'play_tracks' in self.control_dict:
 			self.__set_media()
 
@@ -146,6 +154,32 @@ class RupertAudioPlayer():
 			self.__navigate()
 
 ## Private methods
+
+	@beartype
+	def __get_directory_tracks(self, directory: str) -> list[str]:
+		"""
+			Description: Gets the tracks in a directory
+			Responsible for:
+				1. Returning a list of tracks in a directory
+		"""
+		audio_extensions = {
+			'.aac', '.aiff', '.alac', '.flac', '.m4a', '.mp3', '.ogg', '.opus', '.wav', '.wma'
+		}
+		directory_path = Path(directory).expanduser().resolve()
+
+		if not directory_path.exists() or not directory_path.is_dir():
+			raise ValueError(f"Invalid play_directory: {directory}")
+
+		tracks = [
+			str(path.resolve())
+			for path in sorted(directory_path.iterdir())
+			if path.is_file() and path.suffix.lower() in audio_extensions
+		]
+
+		if not tracks:
+			raise ValueError(f"No audio files found in play_directory: {directory}")
+
+		return tracks
 
 	@beartype
 	def __navigate(self) -> None:

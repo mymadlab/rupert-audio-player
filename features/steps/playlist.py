@@ -137,3 +137,28 @@ def step_then_previous_track_should_play(context):
 	assert status["track_index"] == context.expected_track_index
 	_cleanup(context)
 
+
+@given("a directory containing audio files")
+def step_given_directory_containing_audio_files(context):
+	_setup_player(context)
+	context.play_directory = str(TRACKS_DIR.resolve())
+
+
+@when("I add the directory to the playlist")
+def step_when_i_add_directory_to_playlist(context):
+	context.audio_player.set(
+		{
+			"play_directory": context.play_directory,
+			"play": "play",
+		}
+	)
+
+
+@then("all audio files in the directory should be added to the playlist and start playing in order")
+def step_then_directory_audio_files_added_and_playing(context):
+	status = _wait_for_track_index(context, 0)
+	assert status["track"] is not None
+	assert status["track_index"] == 0
+	assert _track_names_from_mrls(status["media_list"]) == [Path(p).name for p in context.playlist_paths]
+	_cleanup(context)
+
