@@ -33,7 +33,7 @@ class RupertAudioProsumer(RupertProsumer):
 		"""
 		control_dict = json.loads(consumer_message.value().decode("utf-8"))
 		if control_dict['event_type'] == 'control':
-			self.logger.info(f"Received control event")
+			self.logger.info("Received control event")
 			self.logger.debug(f"Event: {control_dict}")
 			self.rap.set(control_dict)
 		elif control_dict['event_type'] == 'status':
@@ -59,21 +59,53 @@ class RupertAudioPlayer():
 		self.eos = None
 
 	@beartype
-	def status(self) -> dict[str, str | int | bool]:
+	def status(self) -> dict[str, str | int | bool | list[str] | None]:
 		"""
 			Description: Gets the current status of the player
 			Responsible for:
 				1. Returning a dictionary with the current status of the player
 		"""
+		current_media = None
+		current_track_mrl = None
+		track_index = -1
+		media_list_mrls: list[str] = []
+
+		if self.media_list_player:
+			media_player = self.media_list_player.get_media_player()
+			if media_player:
+				current_media = media_player.get_media()
+				if current_media:
+					current_track_mrl = current_media.get_mrl()
+
+		if self.media_list and current_media:
+			track_index = self.media_list.index_of_item(current_media)
+
+		if self.media_list:
+			for index in range(self.media_list.count()):
+				media_item = self.media_list.item_at_index(index)
+				if media_item:
+					media_list_mrls.append(media_item.get_mrl())
+
+		if self.media_list_player:
+			state = str(self.media_list_player.get_state())
+			try:
+				loop_mode = str(self.media_list_player.get_playback_mode())
+			except AttributeError:
+				loop_mode = "single"
+			volume = self.media_list_player.get_media_player().audio_get_volume()
+		else:
+			state = "stopped"
+			loop_mode = "single"
+			volume = 0
+
 		status_dict = {
-			"state": self.media_list_player.get_state().name if self.media_list_player else "stopped",
-			"volume": (
-				self.media_list_player.get_media_player().audio_get_volume()
-				if self.media_list_player
-				else 0
-			),
-			"loop": self.media_list_player.get_playback_mode().name if self.media_list_player else "single",
-			"track": self.media.get_mrl() if self.media else None
+			"state": state,
+			"volume": volume,
+			"loop": loop_mode,
+			"track": current_track_mrl,
+			"track_index": track_index,
+			"instance_index": track_index,
+			"media_list": media_list_mrls,
 		}
 		logger.debug(f"Current player status: {status_dict}")
 		return status_dict
@@ -104,13 +136,41 @@ class RupertAudioPlayer():
 		if 'play' in self.control_dict:
 			self.__play_stop_pause()
 			time.sleep(1) # Required in the event we are also updating loop
-		elif 'volume' in self.control_dict:
+		elif 'volume' in self.control_dict: # If media is being volume will be set as well
 			self.__set_volume()
 
 		if 'loop' in self.control_dict:
 			self.__set_loop()
 
+		if 'navigate' in self.control_dict:
+			self.__navigate()
+
 ## Private methods
+
+	@beartype
+	def __navigate(self) -> None:
+		media_list_count = self.media_list.count()
+		media_index = self.media_list.index_of_item(
+			self.media_list_player.get_media_player().get_media()
+		)
+		self.logger.debug(f"Media list count: {media_list_count} media index: {media_index}")
+		if self.control_dict['navigate'] == 'next':
+			if media_index + 1 < media_list_count: # If not on the last track go to the next one
+				self.logger.info("Next track")
+				self.media_list_player.next()
+			else: # Else reset to the initial track
+				self.logger.info("Initial Track")
+				self.media_list_player.play_item_at_index(0)
+		elif self.control_dict['navigate'] == 'previous':
+			media_index = self.media_list.index_of_item(
+				self.media_list_player.get_media_player().get_media()
+			)
+			if media_index - 1 >= 0: # If not on the first track go to the previous one
+				self.logger.info("Previous track")
+				self.media_list_player.previous()
+			else: # Else reset to the initial track
+				self.logger.info("Initial Track")
+				self.media_list_player.play_item_at_index(0)
 
 	@beartype
 	def __play_stop_pause(self) -> None:
@@ -164,12 +224,23 @@ class RupertAudioPlayer():
 		self.media_list = self.player.media_list_new()
 		# creating a media player object
 		self.media_list_player = self.player.media_list_player_new()
-		if 'volume' in self.control_dict:
+
+		if 'volume' in self.control_dict: # Set volume if it was part the request
 			self.__set_volume()
-		self.media = self.player.media_new(self.control_dict['play_track'])
-		self.logger.info(f"Setting media to {self.control_dict['play_track']}")
-		# adding media to media list
-		self.media_list.add_media(self.media)
+
+		if isinstance(self.control_dict['play_tracks'], list):
+			if self.control_dict.setdefault('shuffle', False):
+				random.shuffle(self.control_dict['play_tracks'])
+
+			for media in self.control_dict['play_tracks']:
+				self.logger.info(f"Adding media: {media}")
+				self.media = self.player.media_new(media)
+				self.media_list.add_media(self.media)
+		else:
+			self.media = self.player.media_new(self.control_dict['play_track'])
+			self.logger.info(f"Setting media to {self.control_dict['play_track']}")
+			# adding media to media list
+			self.media_list.add_media(self.media)
 
 		# setting media list to the mediaplayer
 		self.media_list_player.set_media_list(self.media_list)

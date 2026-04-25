@@ -2,9 +2,8 @@
 
 from pathlib import Path
 
-from behave import given, then, when
 import vlc
-
+from behave import given, then, when
 from rupert_audio_player import RupertAudioPlayer
 
 
