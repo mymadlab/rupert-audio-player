@@ -118,7 +118,7 @@ No lockfile is currently committed in this repository, so the versions below are
 Example install:
 
 ```bash
-pip install "python-vlc>=3.0.0" "beartype>=0.19.0" "loguru>=0.7.0" "confluent-kafka>=2.3.0" "behave>=1.2.6"
+pip install "python-vlc~=3.0.0" "beartype~=0.19.0" "loguru~=0.7.0" "confluent-kafka~=2.3.0" "behave~=1.2.6"
 ```
 
 ## VLC Software Requirement
