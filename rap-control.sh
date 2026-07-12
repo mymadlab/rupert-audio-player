@@ -4,11 +4,11 @@ set -euo pipefail
 ACTION="${1:-}"
 
 # Allow all deployment-specific values to be overridden from the unit file.
-APP_DIR="${APP_DIR:-/home/rupert/app/bin}"
-PYTHON_BIN="${PYTHON_BIN:-/home/rupert/app/rupert_venv-0.0.1/bin/python}"
-RAP_SCRIPT="${RAP_SCRIPT:-${APP_DIR}/rap.py}"
+APP_DIR="${APP_DIR:-/home/rupert/app/}"
+PYTHON_BIN="${PYTHON_BIN:-${APP_DIR}/rupert_venv-0.0.1/bin/python}"
+RAP_SCRIPT="${RAP_SCRIPT:-${APP_DIR}/bin/rap.py}"
 RAP_TOPIC="${RAP_TOPIC:-rupert.audio.control}"
-RUPERT_CONFIG_PATH="${RUPERT_CONFIG_PATH:-${APP_DIR}/rupert_config.json}"
+RUPERT_CONFIG_PATH="${RUPERT_CONFIG_PATH:-${APP_DIR}/cfg/rupert_config.json}"
 RUPERT_PROSUMER_PATH="${RUPERT_PROSUMER_PATH:-}"
 
 # Used by status/stop to discover the RAP process.
