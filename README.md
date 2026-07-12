@@ -8,17 +8,17 @@ It consumes JSON control events, manages playback through VLC, and supports sing
 - Service entrypoint class: `RupertAudioProsumer` in `rupert_audio_player.py`.
 - Player engine class: `RupertAudioPlayer` in `rupert_audio_player.py`.
 - Event handling:
-	- `event_type == "control"`: applies playback changes via `RupertAudioPlayer.set(...)`.
-	- `event_type == "status"`: currently reserved (no status publish implementation yet).
+  - `event_type == "control"`: applies playback changes via `RupertAudioPlayer.set(...)`.
+  - `event_type == "status"`: currently reserved (no status publish implementation yet).
 - Supported controls in the event payload:
-	- `play`: `"play" | "pause" | "stop"`
-	- `play_track`: single track path
-	- `play_tracks`: list of track paths
-	- `play_directory`: directory containing audio files (auto-filtered)
-	- `shuffle`: `true | false`
-	- `loop`: `"single" | "repeat" | "loop"`
-	- `navigate`: `"next" | "previous"`
-	- `volume`: integer 0-100 (VLC scale)
+  - `play`: `"play" | "pause" | "stop"`
+  - `play_track`: single track path
+  - `play_tracks`: list of track paths
+  - `play_directory`: directory containing audio files (auto-filtered)
+  - `shuffle`: `true | false`
+  - `loop`: `"single" | "repeat" | "loop"`
+  - `navigate`: `"next" | "previous"`
+  - `volume`: integer 0-100 (VLC scale)
 
 ## Example JSON Events
 
@@ -26,10 +26,10 @@ It consumes JSON control events, manages playback through VLC, and supports sing
 
 ```json
 {
-	"event_type": "control",
-	"play_tracks": ["/data/audio/sine-test1.mp3"],
-	"play_track": "/data/audio/sine-test1.mp3",
-	"play": "play"
+  "event_type": "control",
+  "play_tracks": ["/data/audio/sine-test1.mp3"],
+  "play_track": "/data/audio/sine-test1.mp3",
+  "play": "play"
 }
 ```
 
@@ -37,14 +37,14 @@ It consumes JSON control events, manages playback through VLC, and supports sing
 
 ```json
 {
-	"event_type": "control",
-	"play_tracks": [
-		"/data/audio/track-a.mp3",
-		"/data/audio/track-b.mp3",
-		"/data/audio/track-c.mp3"
-	],
-	"shuffle": true,
-	"play": "play"
+  "event_type": "control",
+  "play_tracks": [
+    "/data/audio/track-a.mp3",
+    "/data/audio/track-b.mp3",
+    "/data/audio/track-c.mp3"
+  ],
+  "shuffle": true,
+  "play": "play"
 }
 ```
 
@@ -52,9 +52,9 @@ It consumes JSON control events, manages playback through VLC, and supports sing
 
 ```json
 {
-	"event_type": "control",
-	"play_directory": "/data/audio",
-	"play": "play"
+  "event_type": "control",
+  "play_directory": "/data/audio",
+  "play": "play"
 }
 ```
 
@@ -62,9 +62,9 @@ It consumes JSON control events, manages playback through VLC, and supports sing
 
 ```json
 {
-	"event_type": "control",
-	"navigate": "next",
-	"loop": "loop"
+  "event_type": "control",
+  "navigate": "next",
+  "loop": "loop"
 }
 ```
 
@@ -72,9 +72,9 @@ It consumes JSON control events, manages playback through VLC, and supports sing
 
 ```json
 {
-	"event_type": "control",
-	"play": "pause",
-	"volume": 25
+  "event_type": "control",
+  "play": "pause",
+  "volume": 25
 }
 ```
 
@@ -84,23 +84,23 @@ This service extends `RupertProsumer`, so it expects the same Kafka and logging 
 
 ```json
 {
-	"kafka": {
-		"connection": {
-			"bootstrap.servers": "localhost:9092"
-		},
-		"consumer": {
-			"group.id": "rupert-audio-player-group",
-			"auto.offset.reset": "earliest"
-		},
-		"topics": {
-			"audio_control": "rupert.audio.control"
-		}
-	},
-	"logging": {
-		"rotation": "10 MB",
-		"retention": "7 days",
-		"level": "INFO"
-	}
+  "kafka": {
+    "connection": {
+      "bootstrap.servers": "localhost:9092"
+    },
+    "consumer": {
+      "group.id": "rupert-audio-player-group",
+      "auto.offset.reset": "earliest"
+    },
+    "topics": {
+      "audio_control": "rupert.audio.control"
+    }
+  },
+  "logging": {
+    "rotation": "10 MB",
+    "retention": "7 days",
+    "level": "INFO"
+  }
 }
 ```
 
