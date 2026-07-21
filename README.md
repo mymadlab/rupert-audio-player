@@ -28,7 +28,6 @@ It consumes JSON control events, manages playback through VLC, and supports sing
 {
   "event_type": "control",
   "play_tracks": ["/data/audio/sine-test1.mp3"],
-  "play_track": "/data/audio/sine-test1.mp3",
   "play": "play"
 }
 ```

@@ -209,19 +209,14 @@ class RupertAudioPlayer():
 	@beartype
 	def __play_stop_pause(self) -> None:
 		"""
-			Starts or stops the player
+			Starts, stops, pauses, and resumes the player
 		"""
 		logger.info(f"Setting play status to {self.control_dict['play']}")
 		if self.control_dict['play'] == 'stop':
-			try:
-				self.media_list_player.get_media_player().stop()
-			except vlc.VLCException as e:
-				print("VLCException during stop:", e)
-			except AttributeError as e:
-				print("AttributeError during stop:", e)
+			self.__stop()
 		elif self.control_dict['play'] == 'play':
 			self.media_list_player.play()
-		elif self.control_dict['play'] == 'pause':
+		elif self.control_dict['play'] == 'pause': # will resume if already paused
 			try:
 				self.media_list_player.pause()
 			except vlc.VLCException as e:
@@ -254,6 +249,9 @@ class RupertAudioPlayer():
 		"""
 			Sets the playing media
 		"""
+
+		if self.media_list_player.get_media_player().get_state() in [vlc.State.Playing, vlc.State.Paused]:
+			self.__stop()
 		# creating a new media list
 		self.media_list = self.player.media_list_new()
 		# creating a media player object
@@ -285,4 +283,25 @@ class RupertAudioPlayer():
 			Adjusts the volume
 		"""
 		logger.info(f"Setting volume to {self.control_dict['volume']}")
-		self.media_list_player.get_media_player().audio_set_volume(int(self.control_dict['volume']))
+		try:
+			self.media_list_player.get_media_player().audio_set_volume(int(self.control_dict['volume']))
+		except vlc.VLCException as e:
+			logger.error(f"VLCException while setting volume: {e}")
+			print("VLCException during volume set:", e)
+		except AttributeError as e:
+			logger.error(f"AttributeError while setting volume: {e}")
+			print("AttributeError during volume set:", e)
+
+	@beartype
+	def __stop(self) -> None:
+		"""
+			Stops the player
+		"""
+		try:
+			self.media_list_player.get_media_player().stop()
+		except vlc.VLCException as e:
+			logger.error(f"VLCException during stop: {e}")
+			print("VLCException during stop:", e)
+		except AttributeError as e:
+			logger.error(f"AttributeError during stop: {e}")
+			print("AttributeError during stop:", e)
