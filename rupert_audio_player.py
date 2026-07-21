@@ -249,9 +249,12 @@ class RupertAudioPlayer():
 		"""
 			Sets the playing media
 		"""
-
-		if self.media_list_player.get_media_player().get_state() in [vlc.State.Playing, vlc.State.Paused]:
-			self.__stop()
+		try:
+			if self.media_list_player.get_media_player().get_state() in [vlc.State.Playing, vlc.State.Paused]:
+				self.__stop()
+		except AttributeError:
+			# do nothing if media_list_player is not initialized
+			pass
 		# creating a new media list
 		self.media_list = self.player.media_list_new()
 		# creating a media player object
