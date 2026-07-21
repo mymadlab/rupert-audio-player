@@ -36,7 +36,10 @@ class RupertAudioProsumer(RupertProsumer):
 		if control_dict['event_type'] == 'control':
 			self.logger.info("Received control event")
 			self.logger.debug(f"Event: {control_dict}")
-			self.rap.set(control_dict)
+			try:
+				self.rap.set(control_dict)
+			except AttributeError as e:
+				logger.error(f"Unexpected error likely due to not being initialized: {e}")
 		elif control_dict['event_type'] == 'status':
 			pass
 		else :
@@ -255,6 +258,7 @@ class RupertAudioPlayer():
 		except AttributeError:
 			# do nothing if media_list_player is not initialized
 			pass
+
 		# creating a new media list
 		self.media_list = self.player.media_list_new()
 		# creating a media player object
