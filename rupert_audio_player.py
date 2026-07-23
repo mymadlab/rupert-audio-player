@@ -33,14 +33,14 @@ class RupertAudioProsumer(RupertProsumer):
 				consumer_message
 		"""
 		control_dict = json.loads(consumer_message.value().decode("utf-8"))
-		if control_dict['event_type'] == 'control':
+		if control_dict['action_type'] == 'control':
 			self.logger.info("Received control event")
 			self.logger.debug(f"Event: {control_dict}")
 			try:
 				self.rap.set(control_dict)
 			except AttributeError as e:
 				logger.error(f"Unexpected error likely due to not being initialized: {e}")
-		elif control_dict['event_type'] == 'status':
+		elif control_dict['action_type'] == 'status':
 			pass
 		else :
 			pass
